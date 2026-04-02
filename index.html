@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wildlog — Your Real-World Monster Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff88;
+    --green-dark: #00cc6a;
+    --orange: #ff6b2b;
+    --yellow: #ffd93d;
+    --dark: #060a0f;
+    --dark2: #0d1520;
+    --dark3: #111d2b;
+    --text: #e8f4ff;
+    --text-muted: #7a9bb5;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(0,255,136,0.12);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--green);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    transition: transform 0.15s ease;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--green);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+  }
+
+  /* ==================== NAV ==================== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: linear-gradient(to bottom, rgba(6,10,15,0.95), transparent);
+    backdrop-filter: blur(8px);
+  }
+  .nav-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px; font-weight: 900;
+    color: var(--green);
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(0,255,136,0.5);
+  }
+  .nav-logo span { color: var(--text); }
+  .nav-links {
+    display: flex; gap: 36px; list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none;
+    font-size: 13px; font-weight: 500; letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--green); }
+  .nav-cta {
+    background: var(--green); color: var(--dark);
+    padding: 10px 24px; border-radius: 4px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-decoration: none; text-transform: uppercase;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px rgba(0,255,136,0.3);
+  }
+  .nav-cta:hover {
+    background: var(--dark); color: var(--green);
+    box-shadow: 0 0 30px rgba(0,255,136,0.6), inset 0 0 0 1.5px var(--green);
+  }
+
+  /* ==================== HERO ==================== */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 120px 48px 80px;
+    text-align: center;
+  }
+
+  /* Animated grid background */
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+  }
+  @keyframes gridMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(60px); }
+  }
+
+  /* Glow orbs */
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); pointer-events: none;
+  }
+  .orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,255,136,0.12), transparent 70%);
+    top: -100px; left: -100px;
+    animation: float1 8s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,107,43,0.1), transparent 70%);
+    bottom: -50px; right: -50px;
+    animation: float2 10s ease-in-out infinite;
+  }
+  .orb-3 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,217,61,0.08), transparent 70%);
+    top: 50%; left: 60%;
+    animation: float3 12s ease-in-out infinite;
+  }
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,30px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,-40px)} }
+  @keyframes float3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-30px)} }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.25);
+    padding: 8px 20px; border-radius: 100px;
+    font-size: 12px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--green);
+    margin-bottom: 32px;
+    position: relative;
+    animation: fadeUp 0.8s ease forwards;
+    opacity: 0; transform: translateY(20px);
+  }
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:0.4;transform:scale(0.8)}
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 12vw, 140px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.8s 0.1s ease forwards;
+    opacity: 0; transform: translateY(20px);
+  }
+  .hero-title .line1 { display: block; color: var(--text); }
+  .hero-title .line2 {
+    display: block;
+    -webkit-text-stroke: 2px var(--green);
+    color: transparent;
+    text-shadow: 0 0 40px rgba(0,255,136,0.3);
+  }
+  .hero-title .line3 { display: block; color: var(--text); }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--text-muted);
+    max-width: 560px;
+    line-height: 1.65;
+    margin: 28px auto 48px;
+    font-weight: 300;
+    animation: fadeUp 0.8s 0.2s ease forwards;
+    opacity: 0; transform: translateY(20px);
+  }
+
+  .hero-buttons {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.3s ease forwards;
+    opacity: 0; transform: translateY(20px);
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--green); color: var(--dark);
+    padding: 16px 36px; border-radius: 4px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    text-decoration: none; text-transform: uppercase;
+    transition: all 0.25s;
+    box-shadow: 0 0 30px rgba(0,255,136,0.4), 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 50px rgba(0,255,136,0.6), 0 8px 30px rgba(0,0,0,0.5);
+  }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: transparent; color: var(--text);
+    padding: 16px 36px; border-radius: 4px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    text-decoration: none; text-transform: uppercase;
+    transition: all 0.25s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(0,255,136,0.05);
+    transform: translateY(-2px);
+  }
+
+  .hero-stats {
+    display: flex; gap: 60px; justify-content: center;
+    margin-top: 80px;
+    animation: fadeUp 0.8s 0.4s ease forwards;
+    opacity: 0; transform: translateY(20px);
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px; font-weight: 900;
+    color: var(--green);
+    display: block;
+  }
+  .stat-label {
+    font-size: 11px; color: var(--text-muted);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-top: 4px; display: block;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ==================== SCROLL INDICATOR ==================== */
+  .scroll-hint {
+    position: absolute; bottom: 32px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; color: var(--text-muted); font-size: 10px;
+    letter-spacing: 3px; text-transform: uppercase;
+    animation: fadeUp 1s 1s ease forwards;
+    opacity: 0;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--green), transparent);
+    animation: scrollLine 2s ease infinite;
+  }
+  @keyframes scrollLine {
+    0%{transform:scaleY(0);transform-origin:top}
+    50%{transform:scaleY(1);transform-origin:top}
+    50.01%{transform:scaleY(1);transform-origin:bottom}
+    100%{transform:scaleY(0);transform-origin:bottom}
+  }
+
+  /* ==================== MARQUEE ==================== */
+  .marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid rgba(0,255,136,0.1);
+    border-bottom: 1px solid rgba(0,255,136,0.1);
+    background: rgba(0,255,136,0.03);
+    padding: 16px 0;
+  }
+  .marquee {
+    display: flex; gap: 60px;
+    animation: marquee 20s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+  .marquee-item {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: 20px;
+  }
+  .marquee-item::after {
+    content: '◆';
+    color: var(--green); font-size: 8px;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ==================== SECTIONS ==================== */
+  section {
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--green);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 6vw, 80px);
+    line-height: 1;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+
+  .section-desc {
+    font-size: 17px; color: var(--text-muted);
+    line-height: 1.7; max-width: 520px;
+    font-weight: 300;
+  }
+
+  /* ==================== FEATURES GRID ==================== */
+  .features-wrap {
+    padding: 60px 48px 100px;
+    background: var(--dark2);
+    border-top: 1px solid rgba(0,255,136,0.08);
+    border-bottom: 1px solid rgba(0,255,136,0.08);
+  }
+  .features-inner { max-width: 1200px; margin: 0 auto; }
+
+  .features-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 60px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .feature-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 40px 36px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,255,136,0.06), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-card:hover {
+    border-color: rgba(0,255,136,0.3);
+    transform: translateY(-4px);
+  }
+  .feature-card.highlight {
+    background: rgba(0,255,136,0.06);
+    border-color: rgba(0,255,136,0.25);
+    grid-column: span 2;
+  }
+
+  .feature-icon {
+    font-size: 36px; margin-bottom: 20px;
+    display: block;
+    filter: drop-shadow(0 0 10px rgba(0,255,136,0.4));
+  }
+  .feature-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 3px;
+    color: rgba(0,255,136,0.4);
+    margin-bottom: 16px; display: block;
+  }
+  .feature-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px; letter-spacing: 1px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .feature-desc {
+    font-size: 14px; color: var(--text-muted);
+    line-height: 1.7; font-weight: 300;
+  }
+
+  /* ==================== EXPLORE SECTION ==================== */
+  .explore-section {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+    padding: 100px 48px;
+    max-width: 1200px; margin: 0 auto;
+  }
+
+  .map-visual {
+    position: relative;
+    aspect-ratio: 1;
+    background: var(--dark3);
+    border-radius: 16px;
+    border: 1px solid rgba(0,255,136,0.15);
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,255,136,0.08);
+  }
+  .map-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .map-glow {
+    position: absolute;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(0,255,136,0.15), transparent 70%);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: mapPulse 3s ease-in-out infinite;
+  }
+  @keyframes mapPulse {
+    0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.7}
+    50%{transform:translate(-50%,-50%) scale(1.3);opacity:1}
+  }
+
+  .map-pin {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center;
+    animation: pinBounce 2s ease-in-out infinite;
+  }
+  @keyframes pinBounce {
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-6px)}
+  }
+  .map-pin .creature { font-size: 32px; }
+  .map-pin .pin-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+    margin-top: 4px;
+  }
+  .map-pin.p1 { top: 20%; left: 25%; animation-delay: 0s; }
+  .map-pin.p2 { top: 55%; left: 65%; animation-delay: 0.5s; }
+  .map-pin.p3 { top: 70%; left: 30%; animation-delay: 1s; }
+  .map-pin.p4 { top: 30%; left: 70%; animation-delay: 1.5s; }
+
+  .map-ring {
+    position: absolute; border-radius: 50%;
+    border: 1.5px solid rgba(0,255,136,0.2);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    animation: ringExpand 3s ease-out infinite;
+  }
+  .map-ring:nth-child(1) { width: 100px; height: 100px; animation-delay: 0s; }
+  .map-ring:nth-child(2) { width: 180px; height: 180px; animation-delay: 1s; }
+  .map-ring:nth-child(3) { width: 260px; height: 260px; animation-delay: 2s; }
+  @keyframes ringExpand {
+    0%{opacity:0.6;transform:translate(-50%,-50%) scale(0.8)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}
+  }
+
+  .map-reward {
+    position: absolute; bottom: 20px; right: 20px;
+    background: rgba(255,107,43,0.15);
+    border: 1px solid rgba(255,107,43,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .reward-icon { font-size: 22px; }
+  .reward-text { font-size: 11px; color: var(--text); font-weight: 600; }
+  .reward-sub { font-size: 10px; color: var(--text-muted); }
+
+  /* ==================== BATTLE SECTION ==================== */
+  .battle-section {
+    padding: 0 48px 100px;
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+  }
+
+  .battle-visual {
+    background: var(--dark3);
+    border-radius: 16px;
+    border: 1px solid rgba(255,107,43,0.15);
+    padding: 40px;
+    order: 1;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,107,43,0.06);
+  }
+  .battle-content { order: 2; }
+
+  .battle-arena {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .battle-arena::before {
+    content: 'VS';
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px; font-weight: 900;
+    color: var(--orange);
+  }
+
+  .battle-mon {
+    text-align: center;
+  }
+  .battle-mon .emoji { font-size: 56px; display: block; }
+  .mon-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; color: var(--text-muted);
+    margin-top: 8px;
+  }
+  .hp-bar-wrap { margin-top: 8px; }
+  .hp-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+  .hp-bar {
+    height: 6px; border-radius: 3px;
+    background: rgba(255,255,255,0.1);
+    overflow: hidden; width: 80px;
+    margin: 0 auto;
+  }
+  .hp-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(to right, var(--green), var(--green-dark));
+  }
+  .hp-fill.low {
+    background: linear-gradient(to right, var(--orange), #ff4444);
+  }
+
+  .battle-log {
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 12px;
+    font-family: 'Space Grotesk', monospace;
+  }
+  .log-line { color: var(--text-muted); margin-bottom: 6px; }
+  .log-line.super { color: var(--yellow); }
+  .log-line.crit { color: var(--orange); }
+  .log-line.good { color: var(--green); }
+  .log-cursor {
+    display: inline-block; width: 8px; height: 12px;
+    background: var(--green);
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .battle-moves {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-top: 16px;
+  }
+  .move-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px; font-weight: 600;
+    color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+    cursor: default;
+    transition: all 0.2s;
+  }
+  .move-btn:hover {
+    background: rgba(0,255,136,0.1);
+    border-color: var(--green);
+  }
+  .move-type {
+    font-size: 9px; letter-spacing: 1px;
+    padding: 2px 6px; border-radius: 3px;
+    font-weight: 700;
+  }
+  .type-fire { background: rgba(255,107,43,0.2); color: var(--orange); }
+  .type-water { background: rgba(61,139,255,0.2); color: #3d8bff; }
+  .type-grass { background: rgba(0,255,136,0.15); color: var(--green); }
+  .type-electric { background: rgba(255,217,61,0.2); color: var(--yellow); }
+
+  /* ==================== FEATURES LIST ==================== */
+  .features-list {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 14px;
+    margin-top: 32px;
+  }
+  .features-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 15px; color: var(--text-muted);
+    font-weight: 400;
+  }
+  .features-list li::before {
+    content: '◆';
+    color: var(--green); font-size: 8px;
+    margin-top: 6px; flex-shrink: 0;
+  }
+  .features-list li strong { color: var(--text); }
+
+  /* ==================== PRO SECTION ==================== */
+  .pro-section {
+    padding: 100px 48px;
+    background: var(--dark2);
+    border-top: 1px solid rgba(0,255,136,0.08);
+    border-bottom: 1px solid rgba(0,255,136,0.08);
+    text-align: center;
+  }
+  .pro-inner { max-width: 800px; margin: 0 auto; }
+
+  .pro-card {
+    background: linear-gradient(135deg, rgba(0,255,136,0.08), rgba(255,107,43,0.05), rgba(0,0,0,0));
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 20px;
+    padding: 60px 48px;
+    margin-top: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pro-card::before {
+    content: 'PRO';
+    position: absolute; top: -30px; right: 40px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 120px;
+    color: rgba(0,255,136,0.04);
+    letter-spacing: 4px;
+    pointer-events: none;
+  }
+
+  .pro-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--green), var(--yellow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .pro-desc {
+    font-size: 18px; color: var(--text-muted);
+    line-height: 1.6; max-width: 500px; margin: 0 auto 40px;
+  }
+  .pro-features {
+    display: flex; justify-content: center; gap: 40px;
+    flex-wrap: wrap; margin-bottom: 40px;
+  }
+  .pro-feature {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: var(--text);
+    font-weight: 500;
+  }
+  .pro-feature .check { color: var(--green); font-size: 16px; }
+
+  /* ==================== CTA ==================== */
+  .cta-section {
+    padding: 120px 48px;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,255,136,0.07) 0%, transparent 70%);
+  }
+  .cta-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 8vw, 100px);
+    line-height: 0.95;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .cta-title .accent { color: var(--green); }
+  .cta-sub {
+    font-size: 18px; color: var(--text-muted);
+    margin-bottom: 48px; font-weight: 300;
+    position: relative;
+  }
+  .cta-buttons {
+    display: flex; gap: 16px; justify-content: center;
+    flex-wrap: wrap; position: relative;
+  }
+
+  /* ==================== FOOTER ==================== */
+  footer {
+    background: var(--dark2);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 40px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px; font-weight: 900;
+    color: var(--green);
+    letter-spacing: 2px;
+  }
+  .footer-logo span { color: var(--text-muted); }
+  .footer-text {
+    font-size: 12px; color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+  .footer-langs {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-muted);
+  }
+  .lang-badge {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.2);
+    color: var(--green);
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  /* ==================== RESPONSIVE ==================== */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section, .explore-section, .battle-section { padding: 60px 24px; }
+    .features-wrap { padding: 60px 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .feature-card.highlight { grid-column: span 1; }
+    .explore-section { grid-template-columns: 1fr; gap: 40px; }
+    .battle-section { grid-template-columns: 1fr; gap: 40px; }
+    .battle-visual { order: 2; }
+    .battle-content { order: 1; }
+    .hero-stats { gap: 30px; }
+    .features-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+    .pro-section { padding: 60px 24px; }
+    .cta-section { padding: 80px 24px; }
+    .pro-card { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-logo">WILD<span>LOG</span></div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#explore">Explore</a></li>
+    <li><a href="#battle">Battle</a></li>
+    <li><a href="#pro">Pro</a></li>
+  </ul>
+  <a href="#download" class="nav-cta">Download</a>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-badge">🌍 Real World Adventure Begins</div>
+
+  <h1 class="hero-title">
+    <span class="line1">YOUR WORLD</span>
+    <span class="line2">IS THE</span>
+    <span class="line3">ARENA</span>
+  </h1>
+
+  <p class="hero-sub">
+    Step outside. The world around you is teeming with wild creatures waiting to be discovered, caught, and trained. Every walk becomes an epic adventure.
+  </p>
+
+  <div class="hero-buttons">
+    <a href="#download" class="btn-primary">
+      <span>🍎</span> App Store
+    </a>
+    <a href="#download" class="btn-secondary">
+      <span>🤖</span> Google Play
+    </a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num">45+</span>
+      <span class="stat-label">Creatures</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">20</span>
+      <span class="stat-label">Languages</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">Adventures</span>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- Marquee -->
+<div class="marquee-wrap">
+  <div class="marquee">
+    <div class="marquee-item">Explore the Real World</div>
+    <div class="marquee-item">Catch & Evolve Creatures</div>
+    <div class="marquee-item">Turn-Based Battles</div>
+    <div class="marquee-item">GPS-Based Discovery</div>
+    <div class="marquee-item">Elemental Strengths</div>
+    <div class="marquee-item">Reward Stops</div>
+    <div class="marquee-item">45+ Unique Monsters</div>
+    <div class="marquee-item">Explore the Real World</div>
+    <div class="marquee-item">Catch & Evolve Creatures</div>
+    <div class="marquee-item">Turn-Based Battles</div>
+    <div class="marquee-item">GPS-Based Discovery</div>
+    <div class="marquee-item">Elemental Strengths</div>
+    <div class="marquee-item">Reward Stops</div>
+    <div class="marquee-item">45+ Unique Monsters</div>
+  </div>
+</div>
+
+<!-- Features -->
+<div class="features-wrap" id="features">
+  <div class="features-inner">
+    <div class="features-header">
+      <div>
+        <div class="section-label">Core Features</div>
+        <h2 class="section-title">BUILT FOR<br>EXPLORERS</h2>
+      </div>
+      <p class="section-desc" style="max-width:360px;">Every feature designed to make your real-world adventure more epic, strategic, and rewarding.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card highlight">
+        <span class="feature-icon">🗺️</span>
+        <span class="feature-num">01 / Feature</span>
+        <div class="feature-title">Live GPS Creature Map</div>
+        <p class="feature-desc">Creatures appear on a real-world map based on your GPS location. Walk through parks, neighborhoods, and city streets to find rare and powerful monsters hiding around every corner. The more you explore, the more you discover.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚔️</span>
+        <span class="feature-num">02 / Feature</span>
+        <div class="feature-title">Strategic Turn-Based Battles</div>
+        <p class="feature-desc">Master the elemental advantage system. Unleash Super Effective attacks with satisfying animations, screen shakes, and floating damage numbers.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">✨</span>
+        <span class="feature-num">03 / Feature</span>
+        <div class="feature-title">Catch & Evolve</div>
+        <p class="feature-desc">Build your ultimate creature collection. Evolve monsters into powerful new forms and fill your complete creature index.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <span class="feature-num">04 / Feature</span>
+        <div class="feature-title">Smart Energy System</div>
+        <p class="feature-desc">Energy regenerates over time, adding a layer of strategy. Plan your moves and conserve energy for rare encounters.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎁</span>
+        <span class="feature-num">05 / Feature</span>
+        <div class="feature-title">Real-World Reward Stops</div>
+        <p class="feature-desc">Visit special map locations inspired by real-world landmarks. Return every 20 minutes for treasure — perfect for daily walks.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Explore Section -->
+<div class="explore-section" id="explore">
+  <div class="map-visual">
+    <div class="map-bg"></div>
+    <div class="map-glow"></div>
+    <div class="map-ring"></div>
+    <div class="map-ring"></div>
+    <div class="map-ring"></div>
+    <div class="map-pin p1"><span class="creature">🦊</span><div class="pin-dot"></div></div>
+    <div class="map-pin p2"><span class="creature">🐉</span><div class="pin-dot"></div></div>
+    <div class="map-pin p3"><span class="creature">🦋</span><div class="pin-dot"></div></div>
+    <div class="map-pin p4"><span class="creature">🐺</span><div class="pin-dot"></div></div>
+    <div class="map-reward">
+      <span class="reward-icon">🎁</span>
+      <div>
+        <div class="reward-text">Reward Stop</div>
+        <div class="reward-sub">Ready to collect!</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">Explore & Discover</div>
+    <h2 class="section-title">THE WORLD<br>IS YOUR<br>HUNTING GROUND</h2>
+    <p class="section-desc">Different areas hold different species. Urban jungles, quiet parks, and hidden alleyways all harbour their own unique creatures waiting to be found.</p>
+
+    <ul class="features-list">
+      <li><strong>GPS-powered live map</strong> — creatures appear near your real location</li>
+      <li><strong>Area-specific species</strong> — each neighborhood has its own ecosystem</li>
+      <li><strong>Reward stops</strong> — real-world POIs that refresh every 20 minutes</li>
+      <li><strong>Rare spawn events</strong> — special creatures appear during events</li>
+      <li><strong>Available in 20 languages</strong> — adventure knows no borders</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Battle Section -->
+<div class="battle-section" id="battle">
+  <div class="battle-content">
+    <div class="section-label">Strategic Combat</div>
+    <h2 class="section-title">EVERY MOVE<br>MATTERS</h2>
+    <p class="section-desc">Master the elemental advantage system. Build the perfect team, chain super effective attacks, and dominate every encounter with strategy and skill.</p>
+
+    <ul class="features-list" style="margin-top: 24px;">
+      <li><strong>Elemental type system</strong> with strengths and weaknesses</li>
+      <li><strong>Super Effective attacks</strong> with satisfying animations</li>
+      <li><strong>Critical hits</strong> with screen shake and damage numbers</li>
+      <li><strong>Team building</strong> — choose the perfect squad</li>
+    </ul>
+  </div>
+
+  <div class="battle-visual">
+    <div class="battle-arena">
+      <div class="battle-mon">
+        <span class="emoji">🐉</span>
+        <div class="mon-name">DRAKOREX</div>
+        <div class="hp-bar-wrap">
+          <div class="hp-label">HP 85/100</div>
+          <div class="hp-bar"><div class="hp-fill" style="width:85%"></div></div>
+        </div>
+      </div>
+      <div class="battle-mon">
+        <span class="emoji">🦊</span>
+        <div class="mon-name">EMBERFOX</div>
+        <div class="hp-bar-wrap">
+          <div class="hp-label">HP 32/100</div>
+          <div class="hp-bar"><div class="hp-fill low" style="width:32%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="battle-log">
+      <div class="log-line good">▶ DRAKOREX used Dragon Breath!</div>
+      <div class="log-line super">⚡ Super Effective! 2x damage!</div>
+      <div class="log-line crit">💥 Critical Hit! ×1.5 bonus!</div>
+      <div class="log-line">▶ EMBERFOX HP: 32/100</div>
+      <div class="log-line">▶ Choose your next move<span class="log-cursor"></span></div>
+    </div>
+
+    <div class="battle-moves">
+      <div class="move-btn"><span class="move-type type-fire">FIRE</span> Ember Blast</div>
+      <div class="move-btn"><span class="move-type type-water">WATER</span> Hydro Rush</div>
+      <div class="move-btn"><span class="move-type type-grass">GRASS</span> Vine Whip</div>
+      <div class="move-btn"><span class="move-type type-electric">ELEC</span> Thunder Bolt</div>
+    </div>
+  </div>
+</div>
+
+<!-- PRO Section -->
+<div class="pro-section" id="pro">
+  <div class="pro-inner">
+    <div class="section-label" style="justify-content: center;">Upgrade Your Adventure</div>
+
+    <div class="pro-card">
+      <div class="pro-title">WILDLOG PRO</div>
+      <p class="pro-desc">Go completely ad-free. Focus on what matters — exploring, battling, and collecting without any interruptions.</p>
+
+      <div class="pro-features">
+        <div class="pro-feature"><span class="check">✦</span> Zero Ads</div>
+        <div class="pro-feature"><span class="check">✦</span> Uninterrupted Gameplay</div>
+        <div class="pro-feature"><span class="check">✦</span> Premium Experience</div>
+        <div class="pro-feature"><span class="check">✦</span> Support Development</div>
+      </div>
+
+      <a href="#download" class="btn-primary" style="display: inline-flex;">
+        Upgrade to Pro ✦
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section" id="download">
+  <div class="cta-bg"></div>
+  <h2 class="cta-title">
+    START YOUR<br><span class="accent">ADVENTURE</span><br>TODAY
+  </h2>
+  <p class="cta-sub">Millions of creatures are waiting. Lace up your shoes and step outside.</p>
+  <div class="cta-buttons">
+    <a href="#" class="btn-primary" style="font-size:13px; padding: 18px 44px;">
+      🍎 &nbsp;Download on App Store
+    </a>
+    <a href="#" class="btn-secondary" style="font-size:13px; padding: 18px 44px;">
+      🤖 &nbsp;Get on Google Play
+    </a>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">WILD<span>LOG</span></div>
+  <div class="footer-text">© 2025 Wildlog. All rights reserved.</div>
+  <div class="footer-langs">
+    <div class="lang-badge">20 Languages</div>
+    <span>Available Worldwide</span>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 6 + 'px';
+    cursor.style.top = my - 6 + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx - 18 + 'px';
+    ring.style.top = ry - 18 + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  // Hover effect on interactive elements
+  document.querySelectorAll('a, button, .feature-card, .move-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'scale(2)';
+      ring.style.transform = 'scale(1.5)';
+      ring.style.opacity = '0.8';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'scale(1)';
+      ring.style.transform = 'scale(1)';
+      ring.style.opacity = '0.5';
+    });
+  });
+
+  // Intersection Observer for fade-in
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.feature-card, .section-label, .section-title, .section-desc').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
